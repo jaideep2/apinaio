@@ -1,6 +1,25 @@
 # clapee
 
-LLM + Img2Img API
+Ready to host LLM + Img2Img Dockerized API
+
+## Requirements
+
+- FastAPI
+- Gunicorn
+- Uvicorn
+- llama-cpp-python
+- Docker
+
+## Plan
+
+- [x] Proof of concept Llama API
+- [ ] Enable https with domain
+- [ ] Update docs
+- [ ] Create Admin
+- [ ] Create frontend chat application
+- [ ] Connect to db (Mongo DB?)
+- [ ] Dockerize
+- [ ] Add add stable diffusion API
 
 ## Current workflow for GCP VM
 
