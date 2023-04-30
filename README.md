@@ -149,6 +149,10 @@ server {
 sudo ln -s /etc/nginx/sites-available/llama.api /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
 
+### HTTPS
+
+https://www.wpmentor.com/setup-domain-google-cloud-platform/
+
 ### Done!
 
 visit http://34.29.137.215/docs to see the interactive API docs
