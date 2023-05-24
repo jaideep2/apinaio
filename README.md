@@ -1,6 +1,6 @@
-# clapee
+# apinaio
 
-Ready to host LLM + Img2Img Dockerized API
+Ready to host LlaMa LLM Example API
 
 ## Requirements
 
@@ -126,7 +126,7 @@ server {
         client_max_body_size 64M;
         listen 80 default_server;
 	   listen [::]:80 default_server;
-        allow 66.183.17.132;
+        allow IPADDRESS;
         deny all;
 
         location / {
@@ -155,4 +155,4 @@ https://www.wpmentor.com/setup-domain-google-cloud-platform/
 
 ### Done!
 
-visit http://34.29.137.215/docs to see the interactive API docs
+visit http://IPADDRESS/docs to see the interactive API docs
