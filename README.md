@@ -13,11 +13,11 @@ Ready to host LlaMa LLM Example API
 ## Plan
 
 - [x] Proof of concept Llama API
-- [ ] Enable https with domain
+- [x] Enable https with domain
 - [ ] Update docs
 - [ ] Create Admin
 - [ ] Create frontend chat application
-- [ ] Connect to db (Mongo DB?)
+- [ ] Connect to vectors db
 - [ ] Dockerize
 - [ ] Add add stable diffusion API
 
@@ -148,8 +148,8 @@ server {
         client_max_body_size 64M;
         listen 80 default_server;
 	   listen [::]:80 default_server;
-        allow IPADDRESS;
-        deny all;
+        #allow WHITELISTEDIPADDRESS;
+        #deny all;
 
         location / {
                 proxy_pass             http://127.0.0.1:8000;
