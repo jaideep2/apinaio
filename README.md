@@ -1,5 +1,8 @@
 # apinaio
 
+> **Warning**  
+> Refactoring for Llama2 version, so website is down. Stay tuned!
+
 Ready to host LlaMa LLM Example API
 
 ## Requirements
