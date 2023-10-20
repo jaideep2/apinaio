@@ -7,8 +7,6 @@ services:
     security_opt:
       # For Rclone mount
       - apparmor:unconfined
-      # For AMD GPU
-      #- seccomp:unconfined
     
     cap_add:
       # For Rclone mount
@@ -17,14 +15,6 @@ services:
     devices:
       # For Rclone mount
       - "/dev/fuse:/dev/fuse"
-      # For AMD GPU
-      #- "/dev/kfd:/dev/kfd"
-      #- "/dev/dri:/dev/dri"
-      
-    # For AMD GPU
-    #group_add:
-    #  - video
-    #  - render
     
     volumes:
       # For Rclone mount
@@ -36,7 +26,7 @@ services:
       # Will echo to root-owned authorized_keys file;
       # Avoids changing local file owner
       - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
-      - ./config/provisioning/default-testing.sh:/opt/ai-dock/bin/provisioning.sh
+      - ./config/provisioning/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
     
     ports:
         # SSH available on host machine port 2222 to avoid conflict. Change to suit
@@ -48,7 +38,7 @@ services:
         # ComfyUI web interface
         - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
         # Jupyter server
-        - ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
+        #- ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
         # Rclone webserver for interactive configuration
         - ${RCLONE_PORT_HOST:-53682}:53682
    
@@ -57,17 +47,17 @@ services:
         - COMFYUI_BRANCH=${COMFYUI_BRANCH:-master}
         - COMFYUI_FLAGS=${COMFYUI_FLAGS:-}
         - COMFYUI_PORT=${COMFYUI_PORT:-8188}
-        - JUPYTER_MODE=${JUPYTER_MODE:-lab}
+        #- JUPYTER_MODE=${JUPYTER_MODE:-lab}
         # Allows running true SSH alongside provider proxy SSH
         - SSH_PORT=${SSH_PORT:-22}
         - WORKSPACE=${WORKSPACE:-/workspace}
         - WORKSPACE_SYNC=${WORKSPACE_SYNC}
-        - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
-        - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
+        #- CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
+        #- CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
         - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
         - WEB_USER=${WEB_USER}
         - WEB_PASSWORD=${WEB_PASSWORD}
-        #- PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
+        - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
 
     deploy:
       resources:

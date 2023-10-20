@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# ignore all but one file in workspace
+workspace/*
+!workspace/.gitkeep
