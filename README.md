@@ -1,185 +1,83 @@
 # apinaio
 
 > **Warning**  
-> Refactoring for Llama2 version, so website is down. Stay tuned!
+> Still in alpha.
 
-Ready to host LlaMa LLM Example API
+Ready to host LLaMa2 + SD/AnimateDiff + ffmpeg API
 
-## Requirements
+## Start
 
-- FastAPI
-- Gunicorn
-- Uvicorn
-- llama-cpp-python
-- Docker
+declare your environment variables in .env and launch a container with docker compose.
 
-## Plan
+You can also self-build from source by editing .env and running docker compose build.
 
-- [x] Proof of concept Llama API
-- [x] Enable https with domain
-- [ ] Update docs
-- [ ] Create Admin
-- [ ] Create frontend chat application
-- [ ] Connect to vectors db
-- [ ] Dockerize
-- [ ] Add add stable diffusion API
+Supported Python versions: 3.10
 
-## Current workflow for GCP VM
+Supported Pytorch versions: 2.0.1
 
-### Followed this
+Supported Platforms: NVIDIA CUDA, AMD ROCm, CPU
 
-https://www.slingacademy.com/article/deploying-fastapi-on-ubuntu-with-nginx-and-lets-encrypt/
+## Environment Variables
 
-### Init VM
+| Variable              | Description |
+| --------------------- | ----------- |
+| `CF_TUNNEL_TOKEN`     | Cloudflare zero trust tunnel token - See [documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/). |
+| `CF_QUICK_TUNNELS`    | Create ephemeral Cloudflare tunnels for web services (default `false`) |
+| `COMFYUI_BRANCH`      | ComfyUI branch/commit hash. Defaults to `master` |
+| `COMFYUI_FLAGS`       | Startup flags. eg. `--gpu-only --highvram` |
+| `COMFYUI_PORT`        | ComfyUI interface port (default `8188`) |
+| `GPU_COUNT`           | Limit the number of available GPUs |
+| `PROVISIONING_SCRIPT` | URL of a remote script to execute on init. See [note](#provisioning-script). |
+| `RCLONE_*`            | Rclone configuration - See [rclone documentation](https://rclone.org/docs/#config-file) |
+| `SKIP_ACL`            | Set `true` to skip modifying workspace ACL |
+| `SSH_PORT`            | Set a non-standard port for SSH (default `22`) |
+| `SSH_PUBKEY`          | Your public key for SSH |
+| `WEB_ENABLE_AUTH`     | Enable password protection for web services (default `true`) |
+| `WEB_USER`            | Username for web services (default `user`) |
+| `WEB_PASSWORD`        | Password for web services (default `password`) |
+| `WORKSPACE`           | A volume path. Defaults to `/workspace/` |
+| `WORKSPACE_SYNC`      | Move mamba environments and services to workspace if mounted (default `true`) |
 
-```
-sudo apt update
-sudo apt install python3-pip # Install root pip3
-sudo apt -y install gunicorn # need to install systemwide
-sudo pip install uvicorn
-sudo pip install fastapi
-```
+## Security
 
-### download vicuna weights
+By default, all exposed web services other than the port redirect page are protected by HTTP basic authentication.
 
-```
-sudo apt-get update
-sudo apt-get -y install git-lfs
-git lfs install --skip-smudge
-git clone https://huggingface.co/eachadea/ggml-vicuna-13b-4bit
-cd ggml-vicuna-13b-4bit/
-git lfs pull --include=ggml-vicuna-13b-4bit-rev1.bin
-```
+The default username is `user` and the password is `password`.
 
-### install llama api
+You can set your credentials by passing environment variables as shown above.
 
-```
-sudo pip3 install llama-cpp-python --no-cache-dir
-```
+The password is stored as a bcrypt hash. If you prefer not to pass a plain text password to the container you can pre-hash and use the variable `WEB_PASSWORD_HASH`.
 
-### test api
+If you are running the image locally on a trusted network, you may disable authentication by setting the environment variable `WEB_ENABLE_AUTH=false`.
 
-```
-from llama_cpp import Llama
-llm = Llama(model_path="/home/jaideep_vancity/ggml-vicuna-13b-4bit/ggml-vicuna-13b-4bit-rev1.bin")
-output = llm("Q: Name the planets in the solar system? A: ", max_tokens=64, stop=["Q:", "\n"], echo=True)
-print(output)
-```
+## Provisioning script
 
-### install llama server
+It can be useful to perform certain actions when starting a container, such as creating directories and downloading files.
 
-```
-sudo pip3 install sse-starlette
-mkdir llama-api
-get this file https://github.com/abetlen/llama-cpp-python/blob/main/examples/high_level_api/fastapi_server.py
-```
+You can use the environment variable `PROVISIONING_SCRIPT` to specify the URL of a script you'd like to run.
 
-### test gunicorn
+The URL must point to a plain text file - GitHub Gists/Pastebin (raw) are suitable options.
 
-```
-export MODEL=/home/jaideep_vancity/ggml-vicuna-13b-4bit/ggml-vicuna-13b-4bit-rev1.bin
-```
+If you are running locally you may instead opt to mount a script at `/opt/ai-dock/bin/provisioning.sh`.
 
-Edit vim llama_api/gunicorn_conf.py
+>[!NOTE]  
+>If configured, `sshd`, `caddy`, `cloudflared`, `rclone`, `port redirector` & `logtail` will be launched before provisioning; Any other processes will launch after.
 
-```python
-from multiprocessing import cpu_count
 
-bind = "127.0.0.1:8000"
+>[!WARNING]  
+>Only use scripts that you trust and which cannot be changed without your consent.
 
-# Worker Options
-workers = cpu_count() + 1
-worker_class = 'uvicorn.workers.UvicornWorker'
+## Open Ports
 
-# Logging Options
-loglevel = 'debug'
-accesslog = '/home/jaideep_vancity/llama_api/access_log'
-errorlog =  '/home/jaideep_vancity/llama_api/error_log'
-```
+Some ports need to be exposed for the services to run or for certain features of the provided software to function
 
-```
-gunicorn fastapi_server:app -k uvicorn.workers.UvicornWorker
-```
 
-### Create service
+| Open Port             | Service / Description     |
+| --------------------- | ------------------------- |
+| `22`                  | SSH server                |
+| `1111`                | Port redirector web UI    |
+| `1122`                | Log viewer web UI         |
+| `8188`                | ComfyUI Interface         |
+| `8888`                | Jupyter                   |
+| `53682`               | Rclone interactive config |
 
-```
-sudo vim /etc/systemd/system/llama_api.service
-```
-
-```bash
-[Unit]
-Description=Gunicorn Daemon for FastAPI example
-After=network.target
-
-[Service]
-User=jaideep_vancity
-Group=admin
-WorkingDirectory=/home/jaideep_vancity/llama_api
-Environment="MODEL=/home/jaideep_vancity/ggml-vicuna-13b-4bit/ggml-vicuna-13b-4bit-rev1.bin"
-ExecStart=/usr/bin/gunicorn -c gunicorn_conf.py fastapi_server:app
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```
-sudo systemctl start llama_api
-sudo systemctl enable llama_api
-sudo systemctl status llama_api
-```
-
-### start nginx
-
-```
-sudo apt install nginx
-sudo systemctl start nginx
-sudo systemctl enable nginx
-sudo systemctl status nginx
-```
-
-### setup nginx config
-
-```
-sudo mv /etc/nginx/sites-enabled/default ./default_backup
-```
-
-Edit sudo vim /etc/nginx/sites-available/llama.api
-
-```nginx
-server {
-        client_max_body_size 64M;
-        listen 80 default_server;
-	   listen [::]:80 default_server;
-        #allow WHITELISTEDIPADDRESS;
-        #deny all;
-
-        location / {
-                proxy_pass             http://127.0.0.1:8000;
-                proxy_read_timeout     60;
-                proxy_connect_timeout  60;
-                proxy_redirect         off;
-
-                # Allow the use of websockets
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade $http_upgrade;
-                proxy_set_header Connection 'upgrade';
-                proxy_set_header Host $host;
-                proxy_cache_bypass $http_upgrade;
-        }
-
-}
-```
-
-```
-sudo ln -s /etc/nginx/sites-available/llama.api /etc/nginx/sites-enabled/
-sudo systemctl restart nginx
-```
-
-### HTTPS
-
-https://www.wpmentor.com/setup-domain-google-cloud-platform/
-
-### Done!
-
-visit http://IPADDRESS/docs to see the OpenAPI API docs
