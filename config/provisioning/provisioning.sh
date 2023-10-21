@@ -95,7 +95,23 @@ fi
 ## AnimatedDiff Models
 animated_models_dir=${nodes_dir}/ComfyUI-AnimateDiff-Evolved/models
 
-# mm_sd_v15_v2 TODO maybe get safetensor?
+# mm_sd_v14
+model_file=${animated_models_dir}/mm_sd_v14.ckpt
+model_url=https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v14.ckpt
+if [[ ! -e ${model_file} ]]; then
+    printf "mm_sd_v14.ckpt...\n"
+    download ${model_url} ${model_file}
+fi
+
+# mm_sd_v15
+model_file=${animated_models_dir}/mm_sd_v15.ckpt
+model_url=https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v15.ckpt
+if [[ ! -e ${model_file} ]]; then
+    printf "mm_sd_v15.ckpt...\n"
+    download ${model_url} ${model_file}
+fi
+
+# mm_sd_v15_v2
 model_file=${animated_models_dir}/mm_sd_v15_v2.ckpt
 model_url=https://huggingface.co/guoyww/animatediff/resolve/main/mm_sd_v15_v2.ckpt
 if [[ ! -e ${model_file} ]]; then
@@ -217,3 +233,41 @@ if [[ ! -e ${model_file} ]]; then
     printf "v2_lora_ZoomOut...\n"
     download ${model_url} ${model_file}
 fi
+
+## AnimatedDiff Interesting Loras
+
+# toonyou_beta3.safetensors
+#https://civitai.com/api/download/models/78775
+
+# lyriel_v16.safetensors
+#https://civitai.com/api/download/models/72396
+
+# rcnzCartoon3d_v10.safetensors
+#https://civitai.com/api/download/models/71009
+
+# majicmixRealistic_v5Preview.safetensors
+#https://civitai.com/api/download/models/79068
+
+# realisticVisionV51_v20Novae.safetensors
+#https://civitai.com/api/download/models/29460
+
+# TUSUN.safetensors
+#https://civitai.com/api/download/models/97261
+# leosamsHelloworldSDXLModel_reality20.safetensors
+#https://civitai.com/api/download/models/50705
+
+# FilmVelvia2.safetensors
+#https://civitai.com/api/download/models/90115
+# leosamsHelloworldSDXLModel_filmGrain10.safetensors
+#https://civitai.com/api/download/models/92475
+
+# Pyramid lora_Ghibli_n3.safetensors
+#https://civitai.com/api/download/models/102828
+# CounterfeitV30_v30.safetensors
+#https://civitai.com/api/download/models/57618
+
+# CarDos Anime 2.0 full
+# https://civitai.com/api/download/models/43825?type=Model&format=SafeTensor&size=full&fp=fp16
+
+# CarDos Animated 3.0 pruned
+# https://civitai.com/api/download/models/101966?type=Model&format=SafeTensor&size=pruned&fp=fp16
