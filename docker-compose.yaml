@@ -1,21 +1,27 @@
 version: "3.8"
 # Compose file build variables set in .env
 services:
+  ollama:
+    image: ollama/ollama:latest
+    build:
+      context: ./config/ollama
+      dockerfile: Dockerfile
+    ports:
+        - "11434:11434"
+    volumes:
+      - ./workspace/ollama:/app
+  
   animatediff:        
     image: ghcr.io/ai-dock/comfyui:latest-cuda
-    
     security_opt:
       # For Rclone mount
       - apparmor:unconfined
-    
     cap_add:
       # For Rclone mount
       - SYS_ADMIN
-    
     devices:
       # For Rclone mount
       - "/dev/fuse:/dev/fuse"
-    
     volumes:
       # For Rclone mount
       - /etc/passwd:/etc/passwd:ro
@@ -29,42 +35,49 @@ services:
       - ./config/provisioning/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
       - ./config/provisioning/models.csv:/opt/ai-dock/bin/models.csv
       - ./config/provisioning/nodes.csv:/opt/ai-dock/bin/nodes.csv
-    
     ports:
-        # SSH available on host machine port 2222 to avoid conflict. Change to suit
-        - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
-        # redirect to Cloudflare quick tunnel
-        - ${REDIRECTOR_PORT_HOST}:1111
-        # Websocket log viewer
-        - ${LOG_VIEWER_PORT_HOST}:1122
-        # ComfyUI web interface
-        - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
-        # Jupyter server
-        #- ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
-        # Rclone webserver for interactive configuration
-        - ${RCLONE_PORT_HOST:-53682}:53682
-   
+      # SSH available on host machine port 2222 to avoid conflict. Change to suit
+      - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
+      # redirect to Cloudflare quick tunnel
+      - ${REDIRECTOR_PORT_HOST}:1111
+      # Websocket log viewer
+      - ${LOG_VIEWER_PORT_HOST}:1122
+      # ComfyUI web interface
+      - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
+      # Jupyter server
+      #- ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
+      # Rclone webserver for interactive configuration
+      - ${RCLONE_PORT_HOST:-53682}:53682
     environment:
-        # Don't enclose values in quotes
-        - COMFYUI_BRANCH=${COMFYUI_BRANCH:-master}
-        - COMFYUI_FLAGS=${COMFYUI_FLAGS:-}
-        - COMFYUI_PORT=${COMFYUI_PORT:-8188}
-        #- JUPYTER_MODE=${JUPYTER_MODE:-lab}
-        # Allows running true SSH alongside provider proxy SSH
-        - SSH_PORT=${SSH_PORT:-22}
-        - WORKSPACE=${WORKSPACE:-/workspace}
-        - WORKSPACE_SYNC=${WORKSPACE_SYNC}
-        #- CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
-        #- CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
-        - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
-        - WEB_USER=${WEB_USER}
-        - WEB_PASSWORD=${WEB_PASSWORD}
-        - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
+      # Don't enclose values in quotes
+      - COMFYUI_BRANCH=${COMFYUI_BRANCH:-master}
+      - COMFYUI_FLAGS=${COMFYUI_FLAGS:-}
+      - COMFYUI_PORT=${COMFYUI_PORT:-8188}
+      #- JUPYTER_MODE=${JUPYTER_MODE:-lab}
+      # Allows running true SSH alongside provider proxy SSH
+      - SSH_PORT=${SSH_PORT:-22}
+      - WORKSPACE=${WORKSPACE:-/workspace}
+      - WORKSPACE_SYNC=${WORKSPACE_SYNC}
+      #- CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
+      #- CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
+      - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
+      - WEB_USER=${WEB_USER}
+      - WEB_PASSWORD=${WEB_PASSWORD}
+      - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
+    depends_on:
+      - ollama
 
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+  ffmpeg:
+    image: ghcr.io/jrottenberg/ffmpeg/5.0.1-ubuntu2004:latest
+    volumes:
+      - ./workspace/ffmpeg:${WORKSPACE:-/workspace/}
+    depends_on:
+      - animatediff  
+
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
