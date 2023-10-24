@@ -1,7 +1,21 @@
 version: "3.8"
-# Compose file build variables set in .env
+
+x-app-defaults: &app-defaults
+  restart: always
+  networks:
+    - apinaio
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
 services:
   ollama:
+    <<: *app-defaults
+    container_name: ollama
     image: ollama/ollama:latest
     build:
       context: ./config/ollama
@@ -11,7 +25,9 @@ services:
     volumes:
       - ./workspace/ollama:/app
   
-  animatediff:        
+  comfyui:
+    <<: *app-defaults
+    container_name: comfyui
     image: ghcr.io/ai-dock/comfyui:latest-cuda
     security_opt:
       # For Rclone mount
@@ -68,16 +84,10 @@ services:
       - ollama
 
   ffmpeg:
+    <<: *app-defaults
+    container_name: ffmpeg
     image: ghcr.io/jrottenberg/ffmpeg/5.0.1-ubuntu2004:latest
     volumes:
       - ./workspace/ffmpeg:${WORKSPACE:-/workspace/}
     depends_on:
-      - animatediff  
-
-  deploy:
-    resources:
-      reservations:
-        devices:
-          - driver: nvidia
-            count: 1
-            capabilities: [gpu]
+      - comfyui

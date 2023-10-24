@@ -1,7 +1,7 @@
 # apinaio
 
 > **Warning**  
-> Still in alpha.
+> In development phase. Help is needed! This is a one man show, but I really want to build this out for the world.
 
 Ready to host LLaMa2 + SD/AnimateDiff + ffmpeg API
 
