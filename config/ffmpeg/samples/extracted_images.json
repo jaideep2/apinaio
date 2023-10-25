@@ -1,0 +1,27 @@
+{
+    "totalfiles": 5,
+    "description": "Extracted image files and URLs to download them. By default, downloading image also deletes the image from server. Note that port 3000 in the URL may not be the same as the real port, especially if server is running on Docker/Kubernetes.",
+    "files": [
+      {
+        "name": "ba0f565c-0001.png",
+        "url": "http://127.0.0.1:3000/video/extract/download/ba0f565c-0001.png"
+      },
+      {
+        "name": "ba0f565c-0002.png",
+        "url": "http://127.0.0.1:3000/video/extract/download/ba0f565c-0002.png"
+      },
+      {
+        "name": "ba0f565c-0003.png",
+        "url": "http://127.0.0.1:3000/video/extract/download/ba0f565c-0003.png"
+      },
+      {
+        "name": "ba0f565c-0004.png",
+        "url": "http://127.0.0.1:3000/video/extract/download/ba0f565c-0004.png"
+      },
+      {
+        "name": "ba0f565c-0005.png",
+        "url": "http://127.0.0.1:3000/video/extract/download/ba0f565c-0005.png"
+      }
+    ]
+  }
+  
