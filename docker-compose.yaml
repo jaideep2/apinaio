@@ -13,9 +13,9 @@ x-app-defaults: &app-defaults
             capabilities: [gpu]
 
 services:
-  ollama:
+  ollama-api:
     <<: *app-defaults
-    container_name: ollama
+    container_name: ollama-api
     image: ollama/ollama:latest
     ports:
       - "11434:11434"
@@ -26,9 +26,9 @@ services:
       - ./config/ollama/modelfiles:/app/modelfiles
     entrypoint: /app/entrypoint.sh
 
-  comfyui:
+  comfyui-api:
     <<: *app-defaults
-    container_name: comfyui
+    container_name: comfyui-api
     image: ghcr.io/ai-dock/comfyui:latest-cuda
     security_opt:
       # For Rclone mount
@@ -81,18 +81,22 @@ services:
       - WEB_USER=${WEB_USER}
       - WEB_PASSWORD=${WEB_PASSWORD}
       - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
-    depends_on:
-      - ollama
 
-  ffmpeg:
+  ffmpeg-api: #From https://github.com/gnh1201/ffmpeg-api/
     <<: *app-defaults
-    container_name: ffmpeg
-    image: ghcr.io/jrottenberg/ffmpeg/5.0.1-ubuntu2004:latest
+    container_name: ffmpeg-api
+    build:
+      context: ./config/ffmpeg
+      dockerfile: Dockerfile
+    image: apinaio/ffmpeg-api
+    ports:
+      - '3000:3000'
     volumes:
-      - ./workspace/ffmpeg:${WORKSPACE:-/workspace/}
-    depends_on:
-      - comfyui
-  
+      - ./workspace/ffmpeg/cache:/tmp
+    environment:
+        - KEEP_ALL_FILES=${KEEP_ALL_FILES:-false}
+        - LOG_LEVEL=${LOG_LEVEL:-info}
+
 networks:
   apinaio:
     name: apinaio
