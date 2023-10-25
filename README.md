@@ -129,18 +129,20 @@ http://localhost:11434/api/show -d '{
 * `POST http://localhost:3000/convert/audio/to/wav` - Convert audio file in request body to wav. Returns wav-file.
 * `POST http://localhost:3000/convert/video/to/mp4` - Convert video file in request body to mp4. Returns mp4-file.
 * `POST http://localhost:3000/convert/image/to/jpg` - Convert image file to jpg. Returns jpg-file.
-* `POST http://localhost:3000/video/extract/audio` - Extract audio track from POSTed video file. Returns audio track as 1-channel wav-file.
-** Query param: `mono=no` - Returns audio track, all channels.
-* `POST http://localhost:3000/video/extract/images` - Extract images from POSTed video file as PNG. Default FPS is 1. Returns JSON that includes download links to extracted images.
-** Query param: `compress=zip|gzip` - Returns extracted images as _zip_ or _tar.gz_ (gzip).
-** Query param: `fps=2` - Extract images using specified FPS. 
+* `POST http://localhost:3000/video/extract/audio` - Extract audio track from POSTed video file.
+  * Returns audio track as 1-channel wav-file.
+  * Query param: `mono=no` - Returns audio track, all channels.
+* `POST http://localhost:3000/video/extract/images` - Extract images from POSTed video file as PNG. Default FPS is 1.
+  * Returns JSON that includes download links to extracted images.
+  * Query param: `compress=zip|gzip` - Returns extracted images as _zip_ or _tar.gz_ (gzip).
+  * Query param: `fps=2` - Extract images using specified FPS. 
 * `GET http://localhost:3000/video/extract/download/:filename` - Downloads extracted image file and deletes it from server.
-** Query param: `delete=no` - does not delete file.
+  * Query param: `delete=no` - does not delete file.
 * `POST http://localhost:3000/probe` - Probe media file, return JSON metadata.
 
 ### Environment variables
 
-Can change in docker-compose.yml
+These can be changed in `docker-compose.yml:ffmpeg-api:environment`
 
 * Default log level is _info_. Set log level using environment variable, _LOG_LEVEL_.
 * Set log level to debug: `LOG_LEVEL=debug`
@@ -167,7 +169,7 @@ Extract images from video using the API.
   * Returns JSON that lists image download URLs for each extracted image.
   * Default FPS is 1.
   * Images are in PNG-format.
-  * See sample: link:./samples/extracted_images.json[extracted_images.json].
+  * See sample: link: [extracted_images.json](/config/ffmpeg/samples/extracted_images.json)
 * `curl localhost:3000/video/extract/download/ba0f565c-0001.png`
   * Downloads exracted image and deletes it from server.
 * `curl localhost:3000/video/extract/download/ba0f565c-0001.png?delete=no`
