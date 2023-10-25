@@ -3,23 +3,21 @@
 > **Warning**  
 > In development phase. Help is needed!
 
-Ready to host ollama + Stable Diffusion + ffmpeg Docker images
+Ready to host [Ollama](https://github.com/jmorganca/ollama) + [ComfyUI](https://github.com/comfyanonymous/ComfyUI) + [ffmpeg](https://ffmpeg.lav.io/) Docker images
 
 ## Features
 
-One click deployment of LLM (ollama), text2image (Stable Diffusion) and ffmpeg for all your text2video needs. All three can be configured under config folder. For example:
+One click deployment of [most LLMs](https://ollama.ai/library), most [ComfyUI packages](https://github.com/WASasquatch/comfyui-plugins) and [ffmpeg](https://www.ffmpeg.org/) for all your text2video needs. All three can be configured under config folder. For example:
 
-- config/ollama/entrypoint.sh for downloading models and serving via API
-- config/ollama/modelfiles for defining custom models
+- config/ollama/entrypoint.sh for downloading models and serving via [API]()
+- config/ollama/modelfiles for defining [custom models]()
 - config/comfyui/provisioning.sh for installing custom packages and nodes
-- config/comfyui/models.csv for defining custom models
-- config/comfyui/nodes.csv for defining custom nodes
+- config/comfyui/models.csv for defining [custom models]()
+- config/comfyui/nodes.csv for defining [custom nodes]()
 
 ## Start
 
-Rename template.env to .env and define all the environment variables there then launch a container with docker compose.
-
-You can also self-build from source by editing .env and running docker compose build.
+Rename template.env to .env and define all the environment variables there then launch one or all three containers with docker compose.
 
 Supported Python versions: 3.10
 
@@ -116,3 +114,5 @@ http://localhost:11434/api/show -d '{
 }'
 ```
 
+## Docker Register
+Coming soon
