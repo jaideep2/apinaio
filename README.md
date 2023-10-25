@@ -1,13 +1,23 @@
 # apinaio
 
 > **Warning**  
-> In development phase. Help is needed! This is a one man show, but I really want to build this out for the world.
+> In development phase. Help is needed!
 
-Ready to host LLaMa2 + SD/AnimateDiff + ffmpeg API
+Ready to host ollama + Stable Diffusion + ffmpeg Docker images
+
+## Features
+
+One click deployment of LLM (ollama), text2image (Stable Diffusion) and ffmpeg for all your text2video needs. All three can be configured under config folder. For example:
+
+- config/ollama/entrypoint.sh for downloading models and serving via API
+- config/ollama/modelfiles for defining custom models
+- config/comfyui/provisioning.sh for installing custom packages and nodes
+- config/comfyui/models.csv for defining custom models
+- config/comfyui/nodes.csv for defining custom nodes
 
 ## Start
 
-declare your environment variables in .env and launch a container with docker compose.
+Rename template.env to .env and define all the environment variables there then launch a container with docker compose.
 
 You can also self-build from source by editing .env and running docker compose build.
 
@@ -15,9 +25,9 @@ Supported Python versions: 3.10
 
 Supported Pytorch versions: 2.0.1
 
-Supported Platforms: NVIDIA CUDA, AMD ROCm, CPU
+Supported Platforms: NVIDIA CUDA, CPU (Have not tested others yet)
 
-## Environment Variables
+## Environment Variables (still updating..)
 
 | Variable              | Description |
 | --------------------- | ----------- |
@@ -38,7 +48,7 @@ Supported Platforms: NVIDIA CUDA, AMD ROCm, CPU
 | `WORKSPACE`           | A volume path. Defaults to `/workspace/` |
 | `WORKSPACE_SYNC`      | Move mamba environments and services to workspace if mounted (default `true`) |
 
-## Security
+## Security (for comfyui)
 
 By default, all exposed web services other than the port redirect page are protected by HTTP basic authentication.
 
@@ -50,7 +60,7 @@ The password is stored as a bcrypt hash. If you prefer not to pass a plain text 
 
 If you are running the image locally on a trusted network, you may disable authentication by setting the environment variable `WEB_ENABLE_AUTH=false`.
 
-## Provisioning script
+## Provisioning script (for comfyui)
 
 It can be useful to perform certain actions when starting a container, such as creating directories and downloading files.
 
@@ -78,6 +88,31 @@ Some ports need to be exposed for the services to run or for certain features of
 | `1111`                | Port redirector web UI    |
 | `1122`                | Log viewer web UI         |
 | `8188`                | ComfyUI Interface         |
-| `8888`                | Jupyter                   |
 | `53682`               | Rclone interactive config |
+| `11434`                | Ollama web server        |
+
+## Ollama API examples
+
+Check all the available models
+
+```bash
+curl http://localhost:11434/api/tags
+```
+
+Use midjourney prompt generator model
+
+```bash
+curl -X POST http://localhost:11434/api/generate -d '{
+  "model": "mj:latest",
+  "prompt": "a sports car in the mountains.",
+  "stream": false}'
+```
+
+View model information
+
+```bash
+http://localhost:11434/api/show -d '{
+  "name": "mj:latest"
+}'
+```
 

@@ -1,11 +1,14 @@
 #!/bin/sh
 
-./bin/ollama serve &
-
+# Start web server
+ollama serve &
 sleep 5
 
-curl -X POST http://ollama:11434/api/pull -d '{"name": "llama2"}'
+echo "Creating Model, will take some time..."
+# Create Model
+ollama create mj -f /app/modelfiles/modelfile_midjourney
+sleep 5
+echo "Model Created, enjoy!"
 
-sleep 10
-
+sleep 5
 tail -f /dev/null

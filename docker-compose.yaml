@@ -17,14 +17,15 @@ services:
     <<: *app-defaults
     container_name: ollama
     image: ollama/ollama:latest
-    build:
-      context: ./config/ollama
-      dockerfile: Dockerfile
     ports:
-        - "11434:11434"
+      - "11434:11434"
     volumes:
       - ./workspace/ollama:/app
-  
+      - ./workspace/ollama/models:/root/.ollama/models
+      - ./config/ollama/entrypoint.sh:/app/entrypoint.sh
+      - ./config/ollama/modelfiles:/app/modelfiles
+    entrypoint: /app/entrypoint.sh
+
   comfyui:
     <<: *app-defaults
     container_name: comfyui
@@ -48,9 +49,9 @@ services:
       # Will echo to root-owned authorized_keys file;
       # Avoids changing local file owner
       - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
-      - ./config/provisioning/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
-      - ./config/provisioning/models.csv:/opt/ai-dock/bin/models.csv
-      - ./config/provisioning/nodes.csv:/opt/ai-dock/bin/nodes.csv
+      - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
+      - ./config/comfyui/models.csv:/opt/ai-dock/bin/models.csv
+      - ./config/comfyui/nodes.csv:/opt/ai-dock/bin/nodes.csv
     ports:
       # SSH available on host machine port 2222 to avoid conflict. Change to suit
       - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
@@ -91,3 +92,8 @@ services:
       - ./workspace/ffmpeg:${WORKSPACE:-/workspace/}
     depends_on:
       - comfyui
+  
+networks:
+  apinaio:
+    name: apinaio
+    driver: bridge
