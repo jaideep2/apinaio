@@ -49,17 +49,14 @@ services:
       - NODES_CSV_FILE=${NODES_CSV_FILE:-/opt/ai-dock/bin/nodes.csv}
       - MODELS_CSV_FILE=${MODELS_CSV_FILE:-/opt/ai-dock/bin/models.csv}
 
-  ffmpeg-api: #Move https://github.com/gnh1201/ffmpeg-api/
+  ffmpeg-api: #From https://github.com/jaideep2/ffmpeg-api/
     <<: *app-defaults
     container_name: ffmpeg-api
-    build: #TODO move to https://github.com/jaideep2/ffmpeg-api/
-      context: ./config/ffmpeg
-      dockerfile: Dockerfile
-    image: apinaio/ffmpeg-api
-    ports:
-      - '3000:3000'
+    image: ghcr.io/jaideep2/ffmpeg-api:latest
     volumes:
       - ./workspace/ffmpeg/cache:/tmp
+    ports:
+      - ${FFMPEG_PORT_HOST:-3000}:${FFMPEG_PORT:-3000}
     environment:
         - KEEP_ALL_FILES=${KEEP_ALL_FILES:-false}
         - LOG_LEVEL=${LOG_LEVEL:-info}
