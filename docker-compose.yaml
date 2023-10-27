@@ -26,15 +26,38 @@ services:
       - ${OLLAMA_PORT_HOST:-11434}:${OLLAMA_PORT:-11434}
     entrypoint: /app/entrypoint.sh
 
-  comfyui-api: #From https://github.com/ai-dock/comfyui
+  sdxl-api: #From https://github.com/ai-dock/comfyui
     <<: *app-defaults
-    container_name: comfyui-api
+    container_name: sdxl-api
     image: ghcr.io/ai-dock/comfyui:latest-cuda
     volumes:
       - ./workspace:${WORKSPACE:-/workspace/}:rshared
       - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
-      - ./config/comfyui/models.csv:/opt/ai-dock/bin/models.csv
-      - ./config/comfyui/nodes.csv:/opt/ai-dock/bin/nodes.csv
+      - ./config/comfyui/models_sdxl.csv:/opt/ai-dock/bin/models.csv
+      - ./config/comfyui/nodes_sdxl.csv:/opt/ai-dock/bin/nodes.csv
+    ports:
+      - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
+    environment:
+      - COMFYUI_BRANCH=${COMFYUI_BRANCH:-master}
+      - COMFYUI_FLAGS=${COMFYUI_FLAGS:-}
+      - COMFYUI_PORT=${COMFYUI_PORT:-8188}
+      - WORKSPACE=${WORKSPACE:-/workspace}
+      - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
+      - WEB_USER=${WEB_USER}
+      - WEB_PASSWORD=${WEB_PASSWORD}
+      - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
+      - NODES_CSV_FILE=${NODES_CSV_FILE:-/opt/ai-dock/bin/nodes.csv}
+      - MODELS_CSV_FILE=${MODELS_CSV_FILE:-/opt/ai-dock/bin/models.csv}
+
+  latent-api: #From https://github.com/ai-dock/comfyui
+    <<: *app-defaults
+    container_name: latent-api
+    image: ghcr.io/ai-dock/comfyui:latest-cuda
+    volumes:
+      - ./workspace:${WORKSPACE:-/workspace/}:rshared
+      - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
+      - ./config/comfyui/models_sdxl.csv:/opt/ai-dock/bin/models.csv
+      - ./config/comfyui/nodes_sdxl.csv:/opt/ai-dock/bin/nodes.csv
     ports:
       - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
     environment:
