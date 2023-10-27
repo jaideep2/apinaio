@@ -137,11 +137,9 @@ workspace/*
 *.mp3
 *.m4a
 *.zip
-TODO*
-uploads/*
-dev.dockerfile
-public
 package-lock.json
 input
 node-ffmpeg.zip
 node_modules
+*.csv
+*.txt

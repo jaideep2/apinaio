@@ -32,13 +32,15 @@ Some ports need to be exposed for the services to run or for certain features of
 
 | Open Port             | Service / Description     |
 | --------------------- | ------------------------- |
+| `8188`                | ComfyUI Interface         |
+| `11434`               | Ollama web server         |
+| `3000`                | FFmpeg-api web server     |
+<!--
 | `22`                  | SSH server                |
 | `1111`                | Port redirector web UI    |
 | `1122`                | Log viewer web UI         |
-| `8188`                | ComfyUI Interface         |
 | `53682`               | Rclone interactive config |
-| `11434`               | Ollama web server         |
-| `3000`                | FFmpeg-api web server     |
+-->
 
 ## ComfyUI
 

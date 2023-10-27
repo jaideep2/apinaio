@@ -20,55 +20,49 @@ animated_models_dir=${nodes_dir}/ComfyUI-AnimateDiff-Evolved/models
 animated_motion_lora_dir=${nodes_dir}/ComfyUI-AnimateDiff-Evolved/motion_lora
 
 # Install custom nodes
-NODES_CSV=/opt/ai-dock/bin/nodes.csv
-count=$(awk 'END { print NR }' ${NODES_CSV})
-printf "Found ${count} custom nodes\n"
-
-# Read in node names, urls, and directories
+count=$(awk 'END { print NR }' ${NODES_CSV_FILE})
+printf "Found ${count} possible custom nodes\n"
 for (( i=1; i<=$count; i++ ))
 {
-    node_name[$i]=$(awk -F ',' 'NR=='$i' {print $1}' "${NODES_CSV}")
-    node_url[$i]=$(awk -F ',' 'NR=='$i' {print $2}' "${NODES_CSV}")
-    node_pip[$i]=$(awk -F ',' 'NR=='$i' {print $3}' "${NODES_CSV}")
-}
-
-# Download custom nodes
-for (( i=1; i<=$count; i++ ))
-{
-    node_dir=${nodes_dir}/${node_name[$i]}
-    if [[ ! -d ${node_dir} ]]; then
-        printf "[$i/$count] Installing ${node_name[$i]}...\n"
-        git clone ${node_url[$i]} $node_dir
-    else
-        printf "[$i/$count] ${node_name[$i]} exists, updating...\n"
-        (cd $node_dir && git pull)
-        if [[ ${node_pip[$i]} == "comfyui" ]]; then
-            micromamba run -n comfyui ${PIP_INSTALL} -r $node_dir/requirements.txt
+    # Check if not commented
+    first_char=$(awk 'NR=='$i' {print substr($0,0,1)}' "${NODES_CSV_FILE}")
+    if [[ ${first_char} != "#" ]]; then
+        node_name=$(awk -F ',' 'NR=='$i' {print $1}' "${NODES_CSV_FILE}")
+        node_url=$(awk -F ',' 'NR=='$i' {print $2}' "${NODES_CSV_FILE}")
+        node_pip=$(awk -F ',' 'NR=='$i' {print $3}' "${NODES_CSV_FILE}")
+        node_dir=${nodes_dir}/${node_name}
+        if [[ ! -d ${node_dir} ]]; then
+            printf "[$i/$count] Installing ${node_name}...\n"
+            git clone ${node_url} $node_dir
+        else
+            printf "[$i/$count] ${node_name} exists, updating...\n"
+            (cd $node_dir && git pull)
+            if [[ ${node_pip} == "pip" ]]; then
+                micromamba run -n comfyui ${PIP_INSTALL} -r $node_dir/requirements.txt
+            fi
         fi
+    else
+        printf "[$i/$count] Skipping commented...\n"
     fi
 }
 
 # Install models
-MODEL_CSV=/opt/ai-dock/bin/models.csv
-count=$(awk 'END { print NR }' ${MODEL_CSV})
-printf "Found ${count} models\n"
-
-# Read in model names, urls, and directories
+count=$(awk 'END { print NR }' ${MODELS_CSV_FILE})
+printf "Found ${count} possible models\n"
 for (( i=1; i<=$count; i++ ))
 {
-    model_name[$i]=$(awk -F ',' 'NR=='$i' {print $1}' "${MODEL_CSV}")
-    model_url[$i]=$(awk -F ',' 'NR=='$i' {print $2}' "${MODEL_CSV}")
-    model_dir[$i]=$(awk -F ',' 'NR=='$i' {print $3}' "${MODEL_CSV}")
-}
-
-# Download models
-for (( i=1; i<=$count; i++ ))
-{
-    model_file=${!model_dir[$i]}/${model_name[$i]}
-    if [[ ! -e ${model_file} ]]; then
-        printf "[$i/$count] Downloading ${model_name[$i]}...\n"
-        download ${model_url[$i]} ${model_file}
-    else
-        printf "[$i/$count] ${model_name[$i]} exists, skipping...\n"
+    # Check if not commented
+    first_char=$(awk 'NR=='$i' {print substr($0,0,1)}' "${MODELS_CSV_FILE}")
+    if [[ ${first_char} != "#" ]]; then
+        model_name=$(awk -F ',' 'NR=='$i' {print $1}' "${MODELS_CSV_FILE}")
+        model_url=$(awk -F ',' 'NR=='$i' {print $2}' "${MODELS_CSV_FILE}")
+        model_dir=$(awk -F ',' 'NR=='$i' {print $3}' "${MODELS_CSV_FILE}")
+        model_file=${!model_dir}/${model_name}
+        if [[ ! -e ${model_file} ]]; then
+            printf "[$i/$count] Downloading ${model_name}...\n"
+            download ${model_url} ${model_file}
+        else
+            printf "[$i/$count] ${model_name} exists, skipping...\n"
+        fi
     fi
 }
