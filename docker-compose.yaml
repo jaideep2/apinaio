@@ -13,86 +13,73 @@ x-app-defaults: &app-defaults
             capabilities: [gpu]
 
 services:
-  ollama-api:
+  ollama-api: #From https://github.com/jmorganca/ollama
     <<: *app-defaults
     container_name: ollama-api
     image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
     volumes:
       - ./workspace/ollama:/app
       - ./workspace/ollama/models:/root/.ollama/models
       - ./config/ollama/entrypoint.sh:/app/entrypoint.sh
       - ./config/ollama/modelfiles:/app/modelfiles
+    ports:
+      - ${OLLAMA_PORT_HOST:-11434}:${OLLAMA_PORT:-11434}
     entrypoint: /app/entrypoint.sh
 
-  comfyui-api:
+  sdxl-api: #From https://github.com/ai-dock/comfyui
     <<: *app-defaults
-    container_name: comfyui-api
+    container_name: sdxl-api
     image: ghcr.io/ai-dock/comfyui:latest-cuda
-    security_opt:
-      # For Rclone mount
-      - apparmor:unconfined
-    cap_add:
-      # For Rclone mount
-      - SYS_ADMIN
-    devices:
-      # For Rclone mount
-      - "/dev/fuse:/dev/fuse"
     volumes:
-      # For Rclone mount
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/group:/etc/group:ro
-      - ./config/rclone:/etc/rclone
-      # Workspace
       - ./workspace:${WORKSPACE:-/workspace/}:rshared
-      # Will echo to root-owned authorized_keys file;
-      # Avoids changing local file owner
-      - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
       - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
-      - ./config/comfyui/models.csv:/opt/ai-dock/bin/models.csv
-      - ./config/comfyui/nodes.csv:/opt/ai-dock/bin/nodes.csv
+      - ./config/comfyui/models_sdxl.csv:/opt/ai-dock/bin/models.csv
+      - ./config/comfyui/nodes_sdxl.csv:/opt/ai-dock/bin/nodes.csv
     ports:
-      # SSH available on host machine port 2222 to avoid conflict. Change to suit
-      - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
-      # redirect to Cloudflare quick tunnel
-      - ${REDIRECTOR_PORT_HOST}:1111
-      # Websocket log viewer
-      - ${LOG_VIEWER_PORT_HOST}:1122
-      # ComfyUI web interface
       - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
-      # Jupyter server
-      #- ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
-      # Rclone webserver for interactive configuration
-      - ${RCLONE_PORT_HOST:-53682}:53682
     environment:
-      # Don't enclose values in quotes
       - COMFYUI_BRANCH=${COMFYUI_BRANCH:-master}
       - COMFYUI_FLAGS=${COMFYUI_FLAGS:-}
       - COMFYUI_PORT=${COMFYUI_PORT:-8188}
-      #- JUPYTER_MODE=${JUPYTER_MODE:-lab}
-      # Allows running true SSH alongside provider proxy SSH
-      - SSH_PORT=${SSH_PORT:-22}
       - WORKSPACE=${WORKSPACE:-/workspace}
-      - WORKSPACE_SYNC=${WORKSPACE_SYNC}
-      #- CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
-      #- CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
       - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
       - WEB_USER=${WEB_USER}
       - WEB_PASSWORD=${WEB_PASSWORD}
       - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
+      - NODES_CSV_FILE=${NODES_CSV_FILE:-/opt/ai-dock/bin/nodes.csv}
+      - MODELS_CSV_FILE=${MODELS_CSV_FILE:-/opt/ai-dock/bin/models.csv}
 
-  ffmpeg-api: #From https://github.com/gnh1201/ffmpeg-api/
+  latent-api: #From https://github.com/ai-dock/comfyui
+    <<: *app-defaults
+    container_name: latent-api
+    image: ghcr.io/ai-dock/comfyui:latest-cuda
+    volumes:
+      - ./workspace:${WORKSPACE:-/workspace/}:rshared
+      - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
+      - ./config/comfyui/models_sdxl.csv:/opt/ai-dock/bin/models.csv
+      - ./config/comfyui/nodes_sdxl.csv:/opt/ai-dock/bin/nodes.csv
+    ports:
+      - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
+    environment:
+      - COMFYUI_BRANCH=${COMFYUI_BRANCH:-master}
+      - COMFYUI_FLAGS=${COMFYUI_FLAGS:-}
+      - COMFYUI_PORT=${COMFYUI_PORT:-8188}
+      - WORKSPACE=${WORKSPACE:-/workspace}
+      - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
+      - WEB_USER=${WEB_USER}
+      - WEB_PASSWORD=${WEB_PASSWORD}
+      - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
+      - NODES_CSV_FILE=${NODES_CSV_FILE:-/opt/ai-dock/bin/nodes.csv}
+      - MODELS_CSV_FILE=${MODELS_CSV_FILE:-/opt/ai-dock/bin/models.csv}
+
+  ffmpeg-api: #From https://github.com/jaideep2/ffmpeg-api/
     <<: *app-defaults
     container_name: ffmpeg-api
-    build:
-      context: ./config/ffmpeg
-      dockerfile: Dockerfile
-    image: apinaio/ffmpeg-api
-    ports:
-      - '3000:3000'
+    image: ghcr.io/jaideep2/ffmpeg-api:latest
     volumes:
       - ./workspace/ffmpeg/cache:/tmp
+    ports:
+      - ${FFMPEG_PORT_HOST:-3000}:${FFMPEG_PORT:-3000}
     environment:
         - KEEP_ALL_FILES=${KEEP_ALL_FILES:-false}
         - LOG_LEVEL=${LOG_LEVEL:-info}
