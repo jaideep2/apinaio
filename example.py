@@ -4,7 +4,7 @@ import json
 import os
 
 def process(topic):
-    
+    script = get_script(topic)
     return "Done"
 
 def get_script(): pass #11434
