@@ -26,12 +26,12 @@ services:
       - ${OLLAMA_PORT_HOST:-11434}:${OLLAMA_PORT:-11434}
     entrypoint: /app/entrypoint.sh
 
-  sdxl-api: #From https://github.com/ai-dock/comfyui
+  comfyui-api: #From https://github.com/ai-dock/comfyui
     <<: *app-defaults
-    container_name: sdxl-api
+    container_name: comfyui-api
     image: ghcr.io/ai-dock/comfyui:latest-cuda
     volumes:
-      - ./workspace:${WORKSPACE:-/workspace/}:rshared
+      - ./workspace:${WORKSPACE:-/workspace/}
       - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
       - ./config/comfyui/models_sdxl.csv:/opt/ai-dock/bin/models.csv
       - ./config/comfyui/nodes_sdxl.csv:/opt/ai-dock/bin/nodes.csv
@@ -49,30 +49,7 @@ services:
       - NODES_CSV_FILE=${NODES_CSV_FILE:-/opt/ai-dock/bin/nodes.csv}
       - MODELS_CSV_FILE=${MODELS_CSV_FILE:-/opt/ai-dock/bin/models.csv}
 
-  latent-api: #From https://github.com/ai-dock/comfyui
-    <<: *app-defaults
-    container_name: latent-api
-    image: ghcr.io/ai-dock/comfyui:latest-cuda
-    volumes:
-      - ./workspace:${WORKSPACE:-/workspace/}:rshared
-      - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
-      - ./config/comfyui/models_sdxl.csv:/opt/ai-dock/bin/models.csv
-      - ./config/comfyui/nodes_sdxl.csv:/opt/ai-dock/bin/nodes.csv
-    ports:
-      - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
-    environment:
-      - COMFYUI_BRANCH=${COMFYUI_BRANCH:-master}
-      - COMFYUI_FLAGS=${COMFYUI_FLAGS:-}
-      - COMFYUI_PORT=${COMFYUI_PORT:-8188}
-      - WORKSPACE=${WORKSPACE:-/workspace}
-      - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
-      - WEB_USER=${WEB_USER}
-      - WEB_PASSWORD=${WEB_PASSWORD}
-      - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
-      - NODES_CSV_FILE=${NODES_CSV_FILE:-/opt/ai-dock/bin/nodes.csv}
-      - MODELS_CSV_FILE=${MODELS_CSV_FILE:-/opt/ai-dock/bin/models.csv}
-
-  ffmpeg-api: #From https://github.com/jaideep2/ffmpeg-api/
+  ffmpeg-api: #From https://github.com/jaideep2/ffmpeg-api
     <<: *app-defaults
     container_name: ffmpeg-api
     image: ghcr.io/jaideep2/ffmpeg-api:latest
