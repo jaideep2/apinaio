@@ -20,7 +20,7 @@ One click deployment of [most LLMs](https://ollama.ai/library), most [ComfyUI pa
 ```bash
 docker compose up -d # Will take a while
 pip install -r requirements.txt
-python3 example.py # Running on local URL:  http://127.0.0.1:7860
+gradio example.py # Running on local URL:  http://127.0.0.1:7860
 ```
 Tested on: Python 3.10 / Pytorch 2.0.1, NVIDIA CUDA (WSL) (Have not tested others yet)
 

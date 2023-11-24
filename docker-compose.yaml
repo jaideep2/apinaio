@@ -10,10 +10,10 @@ x-app-defaults: &app-defaults
         devices:
           - driver: nvidia
             count: 1
-            capabilities: [gpu]
+            capabilities: [gpu, video] # https://stackoverflow.com/a/75809584
 
 services:
-  ollama-api: #From https://github.com/jmorganca/ollama
+  ollama-api:
     <<: *app-defaults
     container_name: ollama-api
     image: ollama/ollama:latest
@@ -22,19 +22,21 @@ services:
       - ./workspace/ollama/models:/root/.ollama/models
       - ./config/ollama/entrypoint.sh:/app/entrypoint.sh
       - ./config/ollama/modelfiles:/app/modelfiles
+      - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
     ports:
       - ${OLLAMA_PORT_HOST:-11434}:${OLLAMA_PORT:-11434}
     entrypoint: /app/entrypoint.sh
 
-  comfyui-api: #From https://github.com/ai-dock/comfyui
+  comfyui-api:
     <<: *app-defaults
     container_name: comfyui-api
     image: ghcr.io/ai-dock/comfyui:latest-cuda
     volumes:
       - ./workspace:${WORKSPACE:-/workspace/}
       - ./config/comfyui/provisioning.sh:/opt/ai-dock/bin/provisioning.sh
-      - ./config/comfyui/models_sdxl.csv:/opt/ai-dock/bin/models.csv
-      - ./config/comfyui/nodes_sdxl.csv:/opt/ai-dock/bin/nodes.csv
+      - ./config/comfyui/models.csv:/opt/ai-dock/bin/models.csv
+      - ./config/comfyui/nodes.csv:/opt/ai-dock/bin/nodes.csv
+      - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
     ports:
       - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT:-8188}
     environment:
@@ -49,17 +51,14 @@ services:
       - NODES_CSV_FILE=${NODES_CSV_FILE:-/opt/ai-dock/bin/nodes.csv}
       - MODELS_CSV_FILE=${MODELS_CSV_FILE:-/opt/ai-dock/bin/models.csv}
 
-  ffmpeg-api: #From https://github.com/jaideep2/ffmpeg-api
+  ffmpeg:
     <<: *app-defaults
     container_name: ffmpeg-api
-    image: ghcr.io/jaideep2/ffmpeg-api:latest
+    image: craiggilchrist/ffmpeg-cuda:12.3
+    command: tail -F keep_container_running
     volumes:
-      - ./workspace/ffmpeg/cache:/tmp
-    ports:
-      - ${FFMPEG_PORT_HOST:-3000}:${FFMPEG_PORT:-3000}
-    environment:
-        - KEEP_ALL_FILES=${KEEP_ALL_FILES:-false}
-        - LOG_LEVEL=${LOG_LEVEL:-info}
+      - ./workspace/ffmpeg:/output
+      - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
 
 networks:
   apinaio:

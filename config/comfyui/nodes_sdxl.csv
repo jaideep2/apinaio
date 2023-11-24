@@ -1,0 +1,2 @@
+# You can define custom nodes here in the format NODE_FOLDER_NAME, GITHUB_LINK, PIP_OR_NOT
+ComfyUI-Manager,https://github.com/ltdrdata/ComfyUI-Manager,not

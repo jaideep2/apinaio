@@ -5,3 +5,4 @@ scripts
 .csv.template
 .txt
 .env.template
+docker-compose.yml

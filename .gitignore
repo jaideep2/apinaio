@@ -131,15 +131,3 @@ dmypy.json
 # ignore all but one file in workspace
 workspace/*
 !workspace/.gitkeep
-
-# ffmpeg-api stuff
-*.avi
-*.mp3
-*.m4a
-*.zip
-package-lock.json
-input
-node-ffmpeg.zip
-node_modules
-*.csv
-*.txt

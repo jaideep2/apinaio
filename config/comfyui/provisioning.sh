@@ -35,11 +35,12 @@ for (( i=1; i<=$count; i++ ))
             printf "[$i/$count] Installing ${node_name}...\n"
             git clone ${node_url} $node_dir
         else
-            printf "[$i/$count] ${node_name} exists, updating...\n"
+            printf "[$i/$count] Updating ${node_name}...\n"
             (cd $node_dir && git pull)
-            if [[ ${node_pip} == "pip" ]]; then
-                micromamba run -n comfyui ${PIP_INSTALL} -r $node_dir/requirements.txt
-            fi
+        fi
+        if [[ ${node_pip} == "pip" ]]; then
+            printf "[$i/$count] Installing/Updating ${node_name} requirements...\n"
+            micromamba run -n comfyui ${PIP_INSTALL} -r $node_dir/requirements.txt
         fi
     else
         printf "[$i/$count] Skipping commented...\n"
