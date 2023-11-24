@@ -1,32 +1,27 @@
-# APInAIo
+# APInAIo (Its a mouthful)
 
 > **Warning**  
-> In development phase.
+> In heavy development. Help needed!
 
-Ready to work text2video pipeline using [Ollama](https://github.com/jmorganca/ollama) + [ComfyUI](https://github.com/comfyanonymous/ComfyUI) + [ffmpeg](https://ffmpeg.lav.io/) Docker images
+Ready to use docker enviroments for rapid development in text2img, img2img, text2video img2video pipelines using [Ollama](https://github.com/jmorganca/ollama) + [ComfyUI](https://github.com/comfyanonymous/ComfyUI) + [ffmpeg](https://ffmpeg.lav.io/) Docker images
 
-## Overview
+## Features
 
-One click deployment of [most LLMs](https://ollama.ai/library), most [ComfyUI packages](https://github.com/WASasquatch/comfyui-plugins) and [ffmpeg](https://www.ffmpeg.org/) for all your text2video AI needs. All three can be configured under config folder. For example:
+- Lots of [LLMs](https://ollama.ai/library) available.
+- Easy to use and update [ComfyUI packages](https://github.com/WASasquatch/comfyui-plugins)
+- GPU enabled [ffmpeg](https://www.ffmpeg.org/) for all encoding/decoding needs.
 
-- config/ollama/entrypoint.sh for downloading models and serving via [API]()
-- config/ollama/modelfiles for defining [custom models]()
-- config/comfyui/provisioning.sh for installing custom packages and nodes
-- config/comfyui/models.csv for defining [custom models]()
-- config/comfyui/nodes.csv for defining [custom nodes]()
+## Configure
 
-## Example run
+- `./config/ollama/entrypoint.sh` for downloading models and serving via [API](https://ollama.ai/library)
+- `./config/ollama/modelfiles` for defining [custom models](https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md)
+- `./config/comfyui/provisioning.sh` for provisioning comfyui and its API
+- `./config/comfyui/models.csv` is used by above for downloading/updating custom models. SDXL and AnimateDiff models included, rename to models.csv for use.
+- `./config/comfyui/nodes.csv` is used by above for downloading/updating custom nodes. SDXL and AnimateDiff nodes included, rename to nodes.csv for use.
 
-```bash
-docker compose up -d # Will take a while
-pip install -r requirements.txt
-gradio example.py # Running on local URL:  http://127.0.0.1:7860
-```
-Tested on: Python 3.10 / Pytorch 2.0.1, NVIDIA CUDA (WSL) (Have not tested others yet)
+## Quickstart
 
-## Individual Docker images
-
-Rename template.env to .env and define all the environment variables there then launch one or all three containers with docker compose:
+Rename template.env to .env and then launch containers one by one (recommended)
 
 ```bash
 docker-compose up ollama-api -d
@@ -34,7 +29,25 @@ docker-compose up comfyui-api -d
 docker-compose up ffmpeg-api -d
 ```
 
+Once they are running you can bring all of them down
+
+```bash
+docker compose down
+```
+
+And bring everything up when needed
+
+```bash
+docker compose up -d
+```
+
+On tested on Python 3.10 / Pytorch 2.0.1, NVIDIA CUDA (WSL)
+
+## Whats Included?
+
 ## Ollama-API
+
+TODO Update Description
 
 ### API examples
 
@@ -60,67 +73,53 @@ http://localhost:11434/api/show -d '{
   "name": "mj:latest"
 }'
 ```
+
 ## ComfyUI
 
-### API examples
+> **Warning**  
+> Runs as root.
 
-Check all the available models
+GUI is visible on port 8188. I usually drag and drop my workflows directly on the browser.
+If Drive space is scarce, change volume mounting point.
 
-```bash
-curl http://localhost:8188/api/tags
-```
-
-### Security
-
-By default, all exposed web services other than the port redirect page are protected by HTTP basic authentication.
-
-The default username is `user` and the password is `password`.
-
-You can set your credentials by passing environment variables as shown above.
-
-The password is stored as a bcrypt hash. If you prefer not to pass a plain text password to the container you can pre-hash and use the variable `WEB_PASSWORD_HASH`.
-
-If you are running the image locally on a trusted network, you may disable authentication by setting the environment variable `WEB_ENABLE_AUTH=false`.
-
-### Provisioning script
-
-It can be useful to perform certain actions when starting a container, such as creating directories and downloading files.
-
-You can use the environment variable `PROVISIONING_SCRIPT` to specify the URL of a script you'd like to run.
-
-The URL must point to a plain text file - GitHub Gists/Pastebin (raw) are suitable options.
+## FFmpeg
 
 > **Warning**  
-> Only use scripts that you trust since they will be executed as root.
+> Runs as root.
 
-## FFmpeg-API
+TODO Update Description
 
-### API endpoints
+### Example usage
 
-* `GET http://localhost:3000/` - API Readme.
-* `GET http://localhost:3000/endpoints` - Service endpoints as JSON.
-* `POST http://localhost:3000/convert/audio/to/mp3` - Convert audio file in request body to mp3. Returns mp3-file.
-* `POST http://localhost:3000/convert/audio/to/wav` - Convert audio file in request body to wav. Returns wav-file.
-* `POST http://localhost:3000/convert/video/to/mp4` - Convert video file in request body to mp4. Returns mp4-file.
-* `POST http://localhost:3000/convert/image/to/jpg` - Convert image file to jpg. Returns jpg-file.
-* `POST http://localhost:3000/video/extract/audio` - Extract audio track from POSTed video file.
-  * Returns audio track as 1-channel wav-file.
-  * Query param: `mono=no` - Returns audio track, all channels.
-* `POST http://localhost:3000/video/extract/images` - Extract images from POSTed video file as PNG. Default FPS is 1.
-  * Returns JSON that includes download links to extracted images.
-  * Query param: `compress=zip|gzip` - Returns extracted images as _zip_ or _tar.gz_ (gzip).
-  * Query param: `fps=2` - Extract images using specified FPS. 
-* `GET http://localhost:3000/video/extract/download/:filename` - Downloads extracted image file and deletes it from server.
-  * Query param: `delete=no` - does not delete file.
-* `POST http://localhost:3000/probe` - Probe media file, return JSON metadata.
+Convert mp4 to png
+
+```bash
+docker exec -it ffmpeg-api ffmpeg -y -hwaccel cuvid -c:v h264_cuvid -resize 576x1024 -i /output/Dancing.mp4 -vf "scale_npp=format=yuv420p,hwdownload,format=yuv420p" -pix_fmt yuvj420p -color_range 2 /output/frame_%03d.jpg
+```
+
+Convert png to jpg
+
+```bash
+docker exec -it ffmpeg-api /bin/bash -c 'for image in /output/*.png; do ffmpeg -i "$image" "${image%.png}.jpg"; rm "$image"; echo "image $image converted to ${image%.png}.jpg "; done'
+```
+
+Convert images to mp4 video
+
+```bash
+docker exec -it ffmpeg-api ffmpeg -y -loglevel error -i '/output/frame_%03d.jpg' -r 30 -c:v hevc_nvenc -pix_fmt yuv420p -preset fast /output/final.mp4
+```
 
 ## Open Ports
 
 Some ports need to be exposed for the services to run or for certain features of the provided software to function
 
-
-| Open Port             | Service / Description     |
+| Open Ports            | Service / Description     |
 | --------------------- | ------------------------- |
 | `11434`               | Ollama web server         |
 | `8188`                | ComfyUI Interface         |
-| `3000`                | FFmpeg-api web server     |
+
+## Roadmap
+* [ ] API Dashboard
+* [ ] Example apps to showcase
+* [ ] Tests
+* [ ] Versioning
